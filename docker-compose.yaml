@@ -1,0 +1,56 @@
+version: '3.9'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: vergabe_postgres
+    environment:
+      POSTGRES_USER: vergabe_user
+      POSTGRES_PASSWORD: vergabe_pass
+      POSTGRES_DB: vergabe_db
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=de_DE.UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      # Schema wird beim Start automatisch importiert
+      - ./01-database-schema.sql:/docker-entrypoint-initdb.d/01-init.sql
+      # Daten-Persistierung
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vergabe_user -d vergabe_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vergabe_network
+
+  # Node.js Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vergabe_backend
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://vergabe_user:vergabe_pass@postgres:5432/vergabe_db
+      JWT_SECRET: dev_secret_change_in_production
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run dev
+    networks:
+      - vergabe_network
+
+volumes:
+  postgres_data:
+
+networks:
+  vergabe_network:
+    driver: bridge
