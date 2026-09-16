@@ -463,10 +463,10 @@ app.use((err, req, res, next) => {
 // SERVER STARTEN
 // ============================================================================
 
-app.listen(PORT, () => {
-    console.log(`\n✅ Vergabe-Advisor Backend läuft auf http://localhost:${PORT}`);
-    console.log(`📊 Health-Check: GET http://localhost:${PORT}/health`);
-    console.log(`🔐 Login: POST http://localhost:${PORT}/api/auth/login`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`\n✅ Vergabe-Advisor Backend läuft auf http://0.0.0.0:${PORT}`);
+    console.log(`📊 Health-Check: GET http://0.0.0.0:${PORT}/health`);
+    console.log(`🔐 Login: POST http://0.0.0.0:${PORT}/api/auth/login`);
 });
 
 process.on('SIGTERM', () => {
