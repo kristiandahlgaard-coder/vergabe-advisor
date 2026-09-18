@@ -74,4 +74,13 @@ app.get('/api/vergaben/:id', async (req, res) => {
 app.post('/api/vergaben', async (req, res) => {
   try {
     const { leistungsart, volumen, beschreibung } = req.body;
-    const result = await pool.query('INSERT INTO vergaben (leistungsart, volumen, beschreibung, status, created_by) VALUES ($1, $2, $3, $4, $5)
+    const result = await pool.query('INSERT INTO vergaben (leistungsart, volumen, beschreibung, status, created_by) VALUES ($1, $2, $3, $4, $5) RETURNING *', [leistungsart, volumen, beschreibung, 'entwurf', 1]);
+    res.status(201).json({ status: 'ok', vergabe: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ Server läuft auf Port ${PORT}`);
+});
