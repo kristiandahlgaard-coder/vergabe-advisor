@@ -61,4 +61,17 @@ app.get('/api/vergaben', async (req, res) => {
   }
 });
 
-app.get('/api/vergaben/:id',
+app.get('/api/vergaben/:id', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM vergaben WHERE id = $1', [req.params.id]);
+    if (!result.rows[0]) return res.status(404).json({ error: 'Nicht gefunden' });
+    res.json({ status: 'ok', vergabe: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/vergaben', async (req, res) => {
+  try {
+    const { leistungsart, volumen, beschreibung } = req.body;
+    const result = await pool.query('INSERT INTO vergaben (leistungsart, volumen, beschreibung, status, created_by) VALUES ($1, $2, $3, $4, $5)
